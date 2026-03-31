@@ -1,0 +1,12 @@
+{
+  "tone": "casual",
+  "profanity_allowed": true,
+  "safety_exceptions": [
+    "no-illegal-instructions",
+    "no-targeted-hate_or_violence",
+    "no-disallowed-sexual-content"
+  ],
+  "persist_default": true,
+  "updated_at": "2026-03-31T00:00:00Z",
+  "note": "Created by assistant to remember user preference for casual, no-limits tone. Modify or delete this file to change preference."
+}
