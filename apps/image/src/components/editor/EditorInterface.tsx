@@ -7,6 +7,7 @@ import { LayerPanel } from './layers/LayerPanel';
 import { HistoryPanel } from './panels/HistoryPanel';
 import { GuidePanel } from './panels/GuidePanel';
 import { PagesBar } from './pages/PagesBar';
+import { DynamicTitleBar } from './DynamicTitleBar';
 import { useUIStore } from '../../stores/ui-store';
 import { useProjectStore } from '../../stores/project-store';
 import { Layers, History, Ruler } from 'lucide-react';
@@ -30,6 +31,7 @@ export function EditorInterface() {
 
   return (
     <div className="h-full w-full flex flex-col bg-background overflow-hidden">
+      <DynamicTitleBar />
       <Toolbar />
 
       <div className="flex-1 flex overflow-hidden">
