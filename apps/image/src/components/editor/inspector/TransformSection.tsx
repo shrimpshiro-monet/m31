@@ -1,5 +1,7 @@
 import { FlipHorizontal2, FlipVertical2, RotateCw, RotateCcw } from 'lucide-react';
 import { useProjectStore } from '../../../stores/project-store';
+import { useEditingContextStore } from '../../../stores/editing-context-store';
+import { trackLayerPropertyChange } from '../../../hooks/useCanvasEditingContext';
 import type { Layer } from '../../../types/project';
 
 interface Props {
@@ -8,6 +10,7 @@ interface Props {
 
 export function TransformSection({ layer }: Props) {
   const { updateLayer, updateLayerTransform } = useProjectStore();
+  const { recordPropertyEdit } = useEditingContextStore();
 
   const { x, y, width, height, rotation, skewX, skewY, opacity } = layer.transform;
   const flipH = layer.flipHorizontal ?? false;
@@ -15,20 +18,29 @@ export function TransformSection({ layer }: Props) {
 
   const handleChange = (key: string, value: number) => {
     updateLayerTransform(layer.id, { [key]: value });
+    // Track property edits for AI Director context
+    recordPropertyEdit(key);
+    trackLayerPropertyChange(key);
   };
 
   const handleFlipHorizontal = () => {
     updateLayer(layer.id, { flipHorizontal: !flipH });
+    recordPropertyEdit('flipHorizontal');
+    trackLayerPropertyChange('flipHorizontal');
   };
 
   const handleFlipVertical = () => {
     updateLayer(layer.id, { flipVertical: !flipV });
+    recordPropertyEdit('flipVertical');
+    trackLayerPropertyChange('flipVertical');
   };
 
   const handleRotate = (degrees: number) => {
     updateLayerTransform(layer.id, {
       rotation: (rotation + degrees) % 360,
     });
+    recordPropertyEdit('rotation');
+    trackLayerPropertyChange('rotation');
   };
 
   return (
