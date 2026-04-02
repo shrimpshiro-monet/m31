@@ -40,6 +40,7 @@ import {
 import { useUIStore, Tool } from '../../../stores/ui-store';
 import { useProjectStore } from '../../../stores/project-store';
 import { useHistoryStore } from '../../../stores/history-store';
+import { useEditingContextStore, type ContentType } from '../../../stores/editing-context-store';
 import { ZoomControl } from './ZoomControl';
 
 interface ToolItem {
@@ -134,6 +135,44 @@ const toolGroups: ToolGroup[] = [
   },
 ];
 
+// Map tools to editing activities for context tracking
+const getActivityForTool = (toolId: Tool): { activity: 'drawing' | 'typing' | 'resizing' | 'cropping' | 'erasing' | 'coloring' | 'adjusting-opacity' | 'applying-filter' | 'applying-effect' | 'selecting' | 'moving'; contentType: ContentType } => {
+  const activityMap: Record<Tool, { activity: 'drawing' | 'typing' | 'resizing' | 'cropping' | 'erasing' | 'coloring' | 'adjusting-opacity' | 'applying-filter' | 'applying-effect' | 'selecting' | 'moving'; contentType: ContentType }> = {
+    select: { activity: 'selecting', contentType: 'layer' },
+    hand: { activity: 'moving', contentType: 'layer' },
+    zoom: { activity: 'selecting', contentType: 'layer' },
+    'marquee-rect': { activity: 'selecting', contentType: 'selection' },
+    'marquee-ellipse': { activity: 'selecting', contentType: 'selection' },
+    lasso: { activity: 'selecting', contentType: 'selection' },
+    'lasso-polygon': { activity: 'selecting', contentType: 'selection' },
+    'magic-wand': { activity: 'selecting', contentType: 'selection' },
+    crop: { activity: 'cropping', contentType: 'image' },
+    'free-transform': { activity: 'resizing', contentType: 'layer' },
+    perspective: { activity: 'resizing', contentType: 'layer' },
+    warp: { activity: 'applying-effect', contentType: 'image' },
+    liquify: { activity: 'applying-effect', contentType: 'image' },
+    brush: { activity: 'drawing', contentType: 'shape' },
+    eraser: { activity: 'erasing', contentType: 'shape' },
+    'paint-bucket': { activity: 'coloring', contentType: 'shape' },
+    gradient: { activity: 'coloring', contentType: 'shape' },
+    'clone-stamp': { activity: 'drawing', contentType: 'image' },
+    'healing-brush': { activity: 'drawing', contentType: 'image' },
+    'spot-healing': { activity: 'drawing', contentType: 'image' },
+    dodge: { activity: 'adjusting-opacity', contentType: 'image' },
+    burn: { activity: 'adjusting-opacity', contentType: 'image' },
+    sponge: { activity: 'adjusting-opacity', contentType: 'image' },
+    blur: { activity: 'applying-filter', contentType: 'image' },
+    sharpen: { activity: 'applying-filter', contentType: 'image' },
+    smudge: { activity: 'applying-effect', contentType: 'image' },
+    pen: { activity: 'drawing', contentType: 'shape' },
+    shape: { activity: 'drawing', contentType: 'shape' },
+    text: { activity: 'typing', contentType: 'text' },
+    eyedropper: { activity: 'coloring', contentType: 'layer' },
+  };
+  
+  return activityMap[toolId] || { activity: 'selecting', contentType: 'layer' };
+};
+
 function ToolGroupButton({
   group,
   activeTool,
@@ -167,13 +206,24 @@ function ToolGroupButton({
   const handleToolSelect = (tool: ToolItem, index: number) => {
     setSelectedIndex(index);
     onSelectTool(tool.id);
+    
+    // Track editing activity
+    const { activity, contentType } = getActivityForTool(tool.id);
+    useEditingContextStore.getState().setActivity(activity, contentType);
+    
     setIsOpen(false);
   };
 
   if (group.tools.length === 1) {
+    const tool = group.tools[0];
     return (
       <button
-        onClick={() => onSelectTool(group.tools[0].id)}
+        onClick={() => {
+          onSelectTool(tool.id);
+          // Track editing activity
+          const { activity, contentType } = getActivityForTool(tool.id);
+          useEditingContextStore.getState().setActivity(activity, contentType);
+        }}
         className={`p-2 rounded-md transition-all ${
           isGroupActive
             ? 'bg-primary text-primary-foreground shadow-sm'
@@ -189,7 +239,12 @@ function ToolGroupButton({
   return (
     <div ref={menuRef} className="relative">
       <button
-        onClick={() => onSelectTool(currentTool.id)}
+        onClick={() => {
+          onSelectTool(currentTool.id);
+          // Track editing activity
+          const { activity, contentType } = getActivityForTool(currentTool.id);
+          useEditingContextStore.getState().setActivity(activity, contentType);
+        }}
         onContextMenu={(e) => {
           e.preventDefault();
           setIsOpen(!isOpen);
