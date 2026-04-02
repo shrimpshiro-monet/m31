@@ -1,4 +1,6 @@
 import { useProjectStore } from '../../../stores/project-store';
+import { useEditingContextStore } from '../../../stores/editing-context-store';
+import { trackLayerPropertyChange } from '../../../hooks/useCanvasEditingContext';
 import type { Layer, BlendMode } from '../../../types/project';
 
 interface Props {
@@ -22,33 +24,44 @@ const BLEND_MODES: BlendMode['mode'][] = [
 
 export function AppearanceSection({ layer }: Props) {
   const { updateLayer } = useProjectStore();
+  const { recordPropertyEdit } = useEditingContextStore();
 
   const handleBlendModeChange = (mode: BlendMode['mode']) => {
     updateLayer(layer.id, { blendMode: { mode } });
+    recordPropertyEdit('blendMode');
+    trackLayerPropertyChange('blendMode');
   };
 
   const handleShadowToggle = () => {
     updateLayer(layer.id, {
       shadow: { ...layer.shadow, enabled: !layer.shadow.enabled },
     });
+    recordPropertyEdit('shadow');
+    trackLayerPropertyChange('shadow');
   };
 
   const handleShadowChange = (key: string, value: string | number) => {
     updateLayer(layer.id, {
       shadow: { ...layer.shadow, [key]: value },
     });
+    recordPropertyEdit(`shadow.${key}`);
+    trackLayerPropertyChange(`shadow.${key}`);
   };
 
   const handleStrokeToggle = () => {
     updateLayer(layer.id, {
       stroke: { ...layer.stroke, enabled: !layer.stroke.enabled },
     });
+    recordPropertyEdit('stroke');
+    trackLayerPropertyChange('stroke');
   };
 
   const handleStrokeChange = (key: string, value: string | number) => {
     updateLayer(layer.id, {
       stroke: { ...layer.stroke, [key]: value },
     });
+    recordPropertyEdit(`stroke.${key}`);
+    trackLayerPropertyChange(`stroke.${key}`);
   };
 
   return (
