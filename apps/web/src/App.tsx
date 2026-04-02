@@ -13,7 +13,6 @@ import { useProjectRecovery } from "./hooks/useProjectRecovery";
 import { useKieAIPoller } from "./hooks/useKieAIPoller";
 import { SOCIAL_MEDIA_PRESETS, type SocialMediaCategory } from "@openreel/core";
 import { TooltipProvider } from "@openreel/ui";
-import AIDirectorDemo from './components/demo/AIDirectorDemo';
 import AIDirectorTestHarness from './components/demo/AIDirectorTestHarness';
 import AIDirectorUI from './pages/AIDirectorDemo';
 import AIDirectorEnhanced from './pages/AIDirectorEnhanced';
