@@ -1,4 +1,6 @@
 import { useProjectStore } from '../../../stores/project-store';
+import { useEditingContextStore } from '../../../stores/editing-context-store';
+import { trackLayerPropertyChange } from '../../../hooks/useCanvasEditingContext';
 import type { ImageLayer, Filter, BlurType } from '../../../types/project';
 import { Sun, Contrast, Palette, Thermometer, Focus, Sparkles, CircleDot, Scan, Film, Minus, Move, Target, SunMedium, Vibrate, Sunrise, SunDim, Aperture } from 'lucide-react';
 
@@ -70,17 +72,22 @@ function AdjustmentSlider({ icon, label, value, min, max, defaultValue, onChange
 
 export function ImageAdjustmentsSection({ layer }: Props) {
   const { updateLayer } = useProjectStore();
+  const { recordPropertyEdit } = useEditingContextStore();
 
   const handleFilterChange = (key: keyof Filter, value: number | BlurType) => {
     updateLayer<ImageLayer>(layer.id, {
       filters: { ...layer.filters, [key]: value },
     });
+    recordPropertyEdit(`filter.${String(key)}`);
+    trackLayerPropertyChange(`filter.${String(key)}`);
   };
 
   const handleBlurTypeChange = (type: BlurType) => {
     updateLayer<ImageLayer>(layer.id, {
       filters: { ...layer.filters, blurType: type },
     });
+    recordPropertyEdit('filter.blurType');
+    trackLayerPropertyChange('filter.blurType');
   };
 
   const resetAllFilters = () => {
