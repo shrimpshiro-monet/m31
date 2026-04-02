@@ -1,5 +1,7 @@
 import { useProjectStore } from '../../../stores/project-store';
 import { useSelectionStore } from '../../../stores/selection-store';
+import { useEditingContextStore } from '../../../stores/editing-context-store';
+import { trackLayerPropertyChange } from '../../../hooks/useCanvasEditingContext';
 import type { Layer } from '../../../types/project';
 import type { LayerMask } from '../../../types/mask';
 import {
@@ -65,6 +67,7 @@ function Slider({ label, value, min, max, step = 1, onChange }: SliderProps) {
 export function MaskSection({ layer }: Props) {
   const { updateLayer } = useProjectStore();
   const { active: selection, clearSelection } = useSelectionStore();
+  const { recordPropertyEdit } = useEditingContextStore();
 
   const mask = layer.mask;
   const hasMask = mask !== null;
@@ -84,6 +87,8 @@ export function MaskSection({ layer }: Props) {
     };
 
     updateLayer(layer.id, { mask: baseMask });
+    recordPropertyEdit('mask');
+    trackLayerPropertyChange('mask');
 
     if (selection) {
       clearSelection();
@@ -92,6 +97,8 @@ export function MaskSection({ layer }: Props) {
 
   const handleDeleteMask = () => {
     updateLayer(layer.id, { mask: null });
+    recordPropertyEdit('mask');
+    trackLayerPropertyChange('mask');
   };
 
   const handleToggleMaskEnabled = () => {
@@ -99,6 +106,8 @@ export function MaskSection({ layer }: Props) {
     updateLayer(layer.id, {
       mask: { ...mask, enabled: !mask.enabled },
     });
+    recordPropertyEdit('mask.enabled');
+    trackLayerPropertyChange('mask.enabled');
   };
 
   const handleToggleMaskLinked = () => {
@@ -106,6 +115,8 @@ export function MaskSection({ layer }: Props) {
     updateLayer(layer.id, {
       mask: { ...mask, linked: !mask.linked },
     });
+    recordPropertyEdit('mask.linked');
+    trackLayerPropertyChange('mask.linked');
   };
 
   const handleToggleMaskInvert = () => {
@@ -113,6 +124,8 @@ export function MaskSection({ layer }: Props) {
     updateLayer(layer.id, {
       mask: { ...mask, invert: !mask.invert },
     });
+    recordPropertyEdit('mask.invert');
+    trackLayerPropertyChange('mask.invert');
   };
 
   const handleDensityChange = (density: number) => {
@@ -120,6 +133,8 @@ export function MaskSection({ layer }: Props) {
     updateLayer(layer.id, {
       mask: { ...mask, density },
     });
+    recordPropertyEdit('mask.density');
+    trackLayerPropertyChange('mask.density');
   };
 
   const handleFeatherChange = (feather: number) => {
@@ -127,10 +142,14 @@ export function MaskSection({ layer }: Props) {
     updateLayer(layer.id, {
       mask: { ...mask, feather },
     });
+    recordPropertyEdit('mask.feather');
+    trackLayerPropertyChange('mask.feather');
   };
 
   const handleToggleClippingMask = () => {
     updateLayer(layer.id, { clippingMask: !layer.clippingMask });
+    recordPropertyEdit('clippingMask');
+    trackLayerPropertyChange('clippingMask');
   };
 
   return (
