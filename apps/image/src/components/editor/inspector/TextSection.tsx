@@ -1,4 +1,6 @@
 import { useProjectStore } from '../../../stores/project-store';
+import { useEditingContextStore } from '../../../stores/editing-context-store';
+import { trackLayerPropertyChange } from '../../../hooks/useCanvasEditingContext';
 import type { TextLayer, TextStyle, TextFillType, Gradient } from '../../../types/project';
 import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, CaseUpper, CaseLower, CaseSensitive, Strikethrough, Type } from 'lucide-react';
 import { FontPicker } from '../../ui/FontPicker';
@@ -62,14 +64,21 @@ const TEXT_PRESETS: TextPreset[] = [
 
 export function TextSection({ layer }: Props) {
   const { updateLayer } = useProjectStore();
+  const { recordPropertyEdit } = useEditingContextStore();
 
   const handleContentChange = (content: string) => {
     updateLayer<TextLayer>(layer.id, { content });
+    recordPropertyEdit('content');
+    trackLayerPropertyChange('content');
   };
 
   const handleStyleChange = (updates: Partial<TextStyle>) => {
     updateLayer<TextLayer>(layer.id, {
       style: { ...layer.style, ...updates },
+    });
+    Object.keys(updates).forEach((key) => {
+      recordPropertyEdit(`style.${key}`);
+      trackLayerPropertyChange(`style.${key}`);
     });
   };
 
