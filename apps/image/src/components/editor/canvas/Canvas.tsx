@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useProjectStore } from '../../../stores/project-store';
 import { useUIStore } from '../../../stores/ui-store';
 import { useCanvasStore, type ResizeHandle } from '../../../stores/canvas-store';
+import { useCanvasEditingContext } from '../../../hooks/useCanvasEditingContext';
 import { calculateSnap } from '../../../utils/snapping';
 import type { Layer, ImageLayer, TextLayer, ShapeLayer, GroupLayer } from '../../../types/project';
 import { Rulers } from './Rulers';
@@ -309,6 +310,14 @@ export function Canvas() {
   const paintLayerIdRef = useRef<string | null>(null);
 
   const artboard = project?.artboards.find((a) => a.id === selectedArtboardId);
+
+  // Track editing context (tool activity, selection, dragging)
+  useCanvasEditingContext(
+    selectedLayerIds,
+    project?.layers ? Object.values(project.layers) : null,
+    isDragging,
+    dragMode
+  );
 
   useEffect(() => {
     if (canvasRef.current) {
