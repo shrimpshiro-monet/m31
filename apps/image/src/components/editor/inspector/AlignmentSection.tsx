@@ -1,4 +1,6 @@
 import { useProjectStore } from '../../../stores/project-store';
+import { useEditingContextStore } from '../../../stores/editing-context-store';
+import { trackLayerPropertyChange } from '../../../hooks/useCanvasEditingContext';
 import type { Layer } from '../../../types/project';
 import {
   AlignHorizontalJustifyStart,
@@ -17,6 +19,7 @@ interface Props {
 
 export function AlignmentSection({ layers }: Props) {
   const { project, selectedArtboardId, updateLayerTransform } = useProjectStore();
+  const { recordPropertyEdit } = useEditingContextStore();
 
   const artboard = project?.artboards.find((a) => a.id === selectedArtboardId);
 
@@ -31,6 +34,8 @@ export function AlignmentSection({ layers }: Props) {
         updateLayerTransform(layer.id, { x: minX });
       });
     }
+    recordPropertyEdit('align-left');
+    trackLayerPropertyChange('align-left');
   };
 
   const alignCenterH = () => {
@@ -48,6 +53,8 @@ export function AlignmentSection({ layers }: Props) {
         });
       });
     }
+    recordPropertyEdit('align-center-h');
+    trackLayerPropertyChange('align-center-h');
   };
 
   const alignRight = () => {
@@ -64,6 +71,8 @@ export function AlignmentSection({ layers }: Props) {
         });
       });
     }
+    recordPropertyEdit('align-right');
+    trackLayerPropertyChange('align-right');
   };
 
   const alignTop = () => {
@@ -75,6 +84,8 @@ export function AlignmentSection({ layers }: Props) {
         updateLayerTransform(layer.id, { y: minY });
       });
     }
+    recordPropertyEdit('align-top');
+    trackLayerPropertyChange('align-top');
   };
 
   const alignCenterV = () => {
@@ -92,6 +103,8 @@ export function AlignmentSection({ layers }: Props) {
         });
       });
     }
+    recordPropertyEdit('align-center-v');
+    trackLayerPropertyChange('align-center-v');
   };
 
   const alignBottom = () => {
@@ -108,6 +121,8 @@ export function AlignmentSection({ layers }: Props) {
         });
       });
     }
+    recordPropertyEdit('align-bottom');
+    trackLayerPropertyChange('align-bottom');
   };
 
   const distributeH = () => {
