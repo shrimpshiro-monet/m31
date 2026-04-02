@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useProjectStore } from '../../../stores/project-store';
+import { useEditingContextStore } from '../../../stores/editing-context-store';
+import { trackLayerPropertyChange } from '../../../hooks/useCanvasEditingContext';
 import type { ShapeLayer, ShapeStyle, Gradient, FillType, StrokeDashType, NoiseFill } from '../../../types/project';
 import { DEFAULT_NOISE_FILL } from '../../../types/project';
 import { Slider } from '@openreel/ui';
@@ -21,12 +23,17 @@ interface Props {
 
 export function ShapeSection({ layer }: Props) {
   const { updateLayer } = useProjectStore();
+  const { recordPropertyEdit } = useEditingContextStore();
   const [isFillOpen, setIsFillOpen] = useState(true);
   const [isStrokeOpen, setIsStrokeOpen] = useState(false);
 
   const handleStyleChange = (updates: Partial<ShapeStyle>) => {
     updateLayer<ShapeLayer>(layer.id, {
       shapeStyle: { ...layer.shapeStyle, ...updates },
+    });
+    Object.keys(updates).forEach((key) => {
+      recordPropertyEdit(`shapeStyle.${key}`);
+      trackLayerPropertyChange(`shapeStyle.${key}`);
     });
   };
 
