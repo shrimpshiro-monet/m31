@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Director Test - Simple</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #e2e8f0;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+    }
+
+    .panel h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #e2e8f0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #cbd5e1;
+      font-size: 0.875rem;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 0.375rem;
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 0.875rem;
+    }
+
+    input[type="file"]::file-selector-button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      background: #2563eb;
+    }
+
+    textarea {
+      resize: vertical;
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      min-height: 150px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
+    }
+
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background 0.2s;
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    button:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+    }
+
+    .button-secondary {
+      background: #475569;
+    }
+
+    .button-secondary:hover {
+      background: #334155;
+    }
+
+    .clip-info {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .clip-info .filename {
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .clip-info .metadata {
+      color: #94a3b8;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .result-panel {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin-top: 1rem;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      color: #10b981;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .error {
+      color: #ef4444;
+    }
+
+    .success {
+      color: #10b981;
+    }
+
+    .warning {
+      color: #f59e0b;
+    }
+
+    .loading {
+      color: #3b82f6;
+    }
+
+    .status {
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .status.error {
+      background: #7f1d1d;
+      color: #fecaca;
+    }
+
+    .status.success {
+      background: #064e3b;
+      color: #d1fae5;
+    }
+
+    .status.info {
+      background: #1e40af;
+      color: #bfdbfe;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎬 AI Director Test</h1>
+    <p class="subtitle">Upload clips, generate EditPlans, refine with natural language.</p>
+
+    <div class="grid">
+      <!-- Left Panel: Controls -->
+      <div class="panel">
+        <h2>📤 Upload & Generate</h2>
+
+        <label for="clipFile">Video/Audio File</label>
+        <input type="file" id="clipFile" accept="video/*,audio/*" />
+
+        <div id="clipsContainer"></div>
+
+        <label for="style">Style</label>
+        <input type="text" id="style" value="hype" placeholder="e.g., hype, cinematic, minimal" />
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="useModel" />
+          <label for="useModel" style="margin: 0;">Use Real Model (GitHub)</label>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="testModel" checked />
+          <label for="testModel" style="margin: 0;">Test Mode (?testModel=true)</label>
+        </div>
+
+        <button id="generateBtn" onclick="handleGenerate()">🚀 Generate EditPlan</button>
+
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #334155;">
+          <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">✨ Refine Plan</h3>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="refineMode" />
+            <label for="refineMode" style="margin: 0;">Enable Refinement</label>
+          </div>
+
+          <textarea id="instruction" placeholder="e.g., Make cuts shorter, add transitions, increase pacing" style="display: none;"></textarea>
+
+          <button id="refineBtn" onclick="handleRefine()" style="display: none; background: #8b5cf6;">✨ Refine Plan</button>
+
+          <button class="button-secondary" onclick="handleClear()" style="margin-top: 0.5rem;">Clear All</button>
+        </div>
+      </div>
+
+      <!-- Right Panel: Results -->
+      <div class="panel">
+        <h2>📊 Results</h2>
+
+        <div id="statusMessage"></div>
+
+        <div style="margin-top: 1rem;">
+          <h3 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: #cbd5e1;">Generated Plan</h3>
+          <div id="resultPlan" class="result-panel">No plan generated yet.</div>
+        </div>
+
+        <div style="margin-top: 1rem;">
+          <h3 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: #cbd5e1;">Raw Response</h3>
+          <div id="rawResponse" class="result-panel">Waiting for API response...</div>
+        </div>
+
+        <div style="margin-top: 1rem;">
+          <h3 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: #cbd5e1;">Clip Metadata</h3>
+          <div id="clipMetadata" class="result-panel">No clips uploaded.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let clips = [];
+    let generatedPlan = null;
+
+    document.getElementById('clipFile').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      try {
+        const metadata = await extractClipMetadata(file);
+        clips.push(metadata);
+        updateClipsDisplay();
+        updateStatus(`Clip added: ${file.name} (${metadata.duration.toFixed(2)}s)`, 'success');
+      } catch (err) {
+        updateStatus(`Failed to read clip: ${err.message}`, 'error');
+      }
+    });
+
+    document.getElementById('refineMode').addEventListener('change', (e) => {
+      document.getElementById('instruction').style.display = e.target.checked ? 'block' : 'none';
+      document.getElementById('refineBtn').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    async function extractClipMetadata(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.src = url;
+
+        const timeout = setTimeout(() => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Timeout reading metadata'));
+        }, 5000);
+
+        video.addEventListener('loadedmetadata', () => {
+          clearTimeout(timeout);
+          const duration = video.duration || 1;
+          const width = video.videoWidth;
+          const height = video.videoHeight;
+          URL.revokeObjectURL(url);
+          resolve({
+            id: `clip-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            filename: file.name,
+            duration: Math.round(duration * 100) / 100,
+            start: 0,
+            width,
+            height,
+          });
+        });
+
+        video.addEventListener('error', () => {
+          clearTimeout(timeout);
+          URL.revokeObjectURL(url);
+          reject(new Error('Failed to read video'));
+        });
+      });
+    }
+
+    function updateClipsDisplay() {
+      const container = document.getElementById('clipsContainer');
+      container.innerHTML = clips
+        .map(
+          (clip, idx) => `
+        <div class="clip-info">
+          <span class="filename">${clip.filename}</span>
+          <div class="metadata">
+            Duration: ${clip.duration}s ${clip.width ? `| ${clip.width}x${clip.height}` : ''}
+          </div>
+          <button class="button-secondary" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.75rem; margin-top: 0.5rem;" onclick="removeClip(${idx})">Remove</button>
+        </div>
+      `
+        )
+        .join('');
+      document.getElementById('clipMetadata').textContent = JSON.stringify(clips, null, 2);
+    }
+
+    function removeClip(idx) {
+      clips.splice(idx, 1);
+      updateClipsDisplay();
+    }
+
+    async function handleGenerate() {
+      if (clips.length === 0) {
+        updateStatus('Please upload at least one clip.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('generateBtn');
+      btn.disabled = true;
+      updateStatus('Generating...', 'loading');
+
+      try {
+        const url = new URL('/api/director/generate', window.location.origin);
+        if (document.getElementById('testModel').checked) {
+          url.searchParams.set('testModel', 'true');
+        }
+
+        const body = {
+          clips,
+          style: document.getElementById('style').value,
+          useModel: document.getElementById('useModel').checked ? 'github-marketplace' : null,
+        };
+
+        const resp = await fetch(url.toString(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        const json = await resp.json();
+        document.getElementById('rawResponse').textContent = JSON.stringify(json, null, 2);
+
+        if (json.error) {
+          updateStatus(`Error: ${json.error}`, 'error');
+          document.getElementById('resultPlan').textContent = JSON.stringify(json, null, 2);
+        } else if (json.plan) {
+          generatedPlan = json.plan;
+          document.getElementById('resultPlan').textContent = JSON.stringify(json.plan, null, 2);
+          updateStatus('✅ Plan generated successfully!', 'success');
+          document.getElementById('refineMode').disabled = false;
+        }
+      } catch (err) {
+        updateStatus(`Request failed: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function handleRefine() {
+      if (!generatedPlan) {
+        updateStatus('No plan to refine. Generate one first.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('refineBtn');
+      btn.disabled = true;
+      updateStatus('Refining...', 'loading');
+
+      try {
+        const url = new URL('/api/director/generate', window.location.origin);
+        if (document.getElementById('testModel').checked) {
+          url.searchParams.set('testModel', 'true');
+        }
+
+        const body = {
+          action: 'refine',
+          plan: generatedPlan,
+          instruction: document.getElementById('instruction').value || 'Improve the plan.',
+          clips,
+          style: document.getElementById('style').value,
+        };
+
+        const resp = await fetch(url.toString(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        const json = await resp.json();
+        document.getElementById('rawResponse').textContent = JSON.stringify(json, null, 2);
+
+        if (json.error) {
+          updateStatus(`Refinement failed: ${json.error}`, 'error');
+        } else if (json.plan) {
+          generatedPlan = json.plan;
+          document.getElementById('resultPlan').textContent = JSON.stringify(json.plan, null, 2);
+          updateStatus('✅ Plan refined successfully!', 'success');
+        }
+      } catch (err) {
+        updateStatus(`Refinement request failed: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function handleClear() {
+      clips = [];
+      generatedPlan = null;
+      document.getElementById('clipFile').value = '';
+      document.getElementById('clipsContainer').innerHTML = '';
+      document.getElementById('resultPlan').textContent = 'No plan generated yet.';
+      document.getElementById('rawResponse').textContent = 'Waiting for API response...';
+      document.getElementById('clipMetadata').textContent = 'No clips uploaded.';
+      document.getElementById('instruction').value = '';
+      document.getElementById('refineMode').checked = false;
+      document.getElementById('instruction').style.display = 'none';
+      document.getElementById('refineBtn').style.display = 'none';
+      updateStatus('Cleared.', 'info');
+    }
+
+    function updateStatus(message, type) {
+      const statusDiv = document.getElementById('statusMessage');
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+    }
+  </script>
+</body>
+</html>

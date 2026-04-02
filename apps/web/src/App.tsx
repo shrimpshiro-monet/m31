@@ -13,6 +13,10 @@ import { useProjectRecovery } from "./hooks/useProjectRecovery";
 import { useKieAIPoller } from "./hooks/useKieAIPoller";
 import { SOCIAL_MEDIA_PRESETS, type SocialMediaCategory } from "@openreel/core";
 import { TooltipProvider } from "@openreel/ui";
+import AIDirectorDemo from './components/demo/AIDirectorDemo';
+import AIDirectorTestHarness from './components/demo/AIDirectorTestHarness';
+import AIDirectorUI from './pages/AIDirectorDemo';
+import AIDirectorEnhanced from './pages/AIDirectorEnhanced';
 
 const EditorInterface = lazy(() =>
   import("./components/editor/EditorInterface").then((m) => ({
@@ -36,6 +40,29 @@ const PRESET_DIMENSIONS: Record<string, SocialMediaCategory> = {
 };
 
 function App() {
+  // Quick demo route: if the URL path starts with /demo render the appropriate demo page.
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/demo')) {
+    if (window.location.pathname === '/demo/ai-director-test') {
+      return (
+        <div className="h-screen w-screen bg-background text-text-primary overflow-auto">
+          <AIDirectorTestHarness />
+        </div>
+      );
+    }
+    if (window.location.pathname === '/demo/ai-director-ui') {
+      return (
+        <div className="h-screen w-screen overflow-auto">
+          <AIDirectorUI />
+        </div>
+      );
+    }
+    // Default demo route - enhanced demo with custom prompts
+    return (
+      <div className="h-screen w-screen overflow-auto">
+        <AIDirectorEnhanced />
+      </div>
+    );
+  }
   const { activeModal, closeModal, skipWelcomeScreen } = useUIStore();
   const { openModal: openSearchModal } = useUIStore();
   const createNewProject = useProjectStore((state) => state.createNewProject);

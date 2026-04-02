@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>✅ AI Director Works</title>
+  <style>
+    body { font-family: sans-serif; background: #1e293b; color: #e2e8f0; padding: 2rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { color: #60a5fa; }
+    .box { background: #0f172a; border: 1px solid #334155; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; }
+    button { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.25rem; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #2563eb; }
+    input { width: 100%; padding: 0.5rem; margin: 0.5rem 0; }
+    #result { background: #0f172a; color: #10b981; padding: 1rem; margin-top: 1rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    .error { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎬 AI Director Test</h1>
+    <p>Upload a video, generate an EditPlan JSON, and test the API.</p>
+
+    <div class="box">
+      <h2>📤 Upload & Generate</h2>
+      <label>Video File:</label>
+      <input type="file" id="videoFile" accept="video/*" />
+      <p id="fileInfo" style="color: #cbd5e1; font-size: 0.9rem;"></p>
+
+      <label>Style:</label>
+      <input type="text" id="style" value="hype" />
+
+      <label style="display: flex; align-items: center; gap: 0.5rem;">
+        <input type="checkbox" id="useModel" /> Use Real Model
+      </label>
+
+      <button onclick="generatePlan()">🚀 Generate EditPlan</button>
+      <button onclick="clearAll()" style="background: #64748b; margin-left: 0.5rem;">Clear</button>
+    </div>
+
+    <div class="box">
+      <h2>📊 Result</h2>
+      <div id="result">Waiting for generation...</div>
+    </div>
+  </div>
+
+  <script>
+    let clipData = null;
+
+    document.getElementById('videoFile').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      try {
+        const metadata = await extractDuration(file);
+        clipData = {
+          id: 'clip-' + Date.now(),
+          filename: file.name,
+          duration: metadata.duration,
+          start: 0,
+          width: metadata.width,
+          height: metadata.height
+        };
+        document.getElementById('fileInfo').textContent = 
+          `✅ ${file.name} - ${metadata.duration.toFixed(2)}s (${metadata.width}x${metadata.height})`;
+        document.getElementById('result').textContent = 'Ready to generate. Click "Generate EditPlan"';
+      } catch (err) {
+        document.getElementById('fileInfo').innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
+      }
+    });
+
+    async function extractDuration(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.src = url;
+
+        const timeout = setTimeout(() => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Timeout'));
+        }, 5000);
+
+        video.onloadedmetadata = () => {
+          clearTimeout(timeout);
+          URL.revokeObjectURL(url);
+          resolve({
+            duration: video.duration || 1,
+            width: video.videoWidth || 0,
+            height: video.videoHeight || 0
+          });
+        };
+
+        video.onerror = () => {
+          clearTimeout(timeout);
+          URL.revokeObjectURL(url);
+          reject(new Error('Could not read video'));
+        };
+      });
+    }
+
+    async function generatePlan() {
+      if (!clipData) {
+        document.getElementById('result').innerHTML = '<span class="error">❌ Please upload a video first</span>';
+        return;
+      }
+
+      document.getElementById('result').textContent = '⏳ Generating...';
+
+      try {
+        const body = {
+          clips: [clipData],
+          style: document.getElementById('style').value || 'hype',
+          useModel: document.getElementById('useModel').checked ? 'github-marketplace' : null
+        };
+
+        const resp = await fetch('/api/director/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const json = await resp.json();
+        document.getElementById('result').textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        document.getElementById('result').innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
+      }
+    }
+
+    function clearAll() {
+      clipData = null;
+      document.getElementById('videoFile').value = '';
+      document.getElementById('fileInfo').textContent = '';
+      document.getElementById('result').textContent = 'Waiting for generation...';
+    }
+  </script>
+</body>
+</html>

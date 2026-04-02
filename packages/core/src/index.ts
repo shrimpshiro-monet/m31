@@ -12,6 +12,8 @@ export * from "./graphics";
 export * from "./photo";
 export * from "./template";
 export * from "./ai";
+export { validateEditPlan } from "./ai/editplan-validator";
+export type { EditPlan } from "./monetAgentConfig";
 export * from "./animation";
 export * from "./effects";
 export * from "./device";

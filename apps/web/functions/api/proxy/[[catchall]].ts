@@ -38,6 +38,12 @@ const SERVICE_CONFIG: Record<string, ServiceConfig> = {
       "anthropic-version": "2023-06-01",
     }),
   },
+  github: {
+    baseUrl: "https://api.github.com",
+    // Allow model-related paths under /models or /ml; adjust as needed in production.
+    allowedPaths: /^(models|models\/.*|ml|ml\/.*)$/, 
+    authHeaders: (key) => ({ Authorization: `Bearer ${key}` }),
+  },
 };
 
 const ALLOWED_ORIGINS = [
@@ -72,7 +78,7 @@ function jsonError(
   });
 }
 
-export const onRequest: PagesFunction = async (context) => {
+export const onRequest = async (context: any) => {
   const corsHeaders = getCorsHeaders(context.request);
 
   if (context.request.method === "OPTIONS") {
