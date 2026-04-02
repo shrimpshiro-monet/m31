@@ -1,4 +1,6 @@
 import { useProjectStore } from '../../../stores/project-store';
+import { useEditingContextStore } from '../../../stores/editing-context-store';
+import { trackLayerPropertyChange } from '../../../hooks/useCanvasEditingContext';
 import type { Layer, Shadow, InnerShadow, Stroke, Glow } from '../../../types/project';
 import { Slider } from '@openreel/ui';
 import { ChevronDown, Droplets, Pencil, Sparkles, CircleDot } from 'lucide-react';
@@ -49,30 +51,39 @@ function EffectHeader({ icon: Icon, label, enabled, isOpen, onToggle, onEnabledC
 
 export function EffectsSection({ layer }: Props) {
   const { updateLayer } = useProjectStore();
+  const { recordPropertyEdit } = useEditingContextStore();
   const [openSection, setOpenSection] = useState<EffectSection>('shadow');
 
   const handleShadowChange = (updates: Partial<Shadow>) => {
     updateLayer(layer.id, {
       shadow: { ...layer.shadow, ...updates },
     });
+    recordPropertyEdit('shadow');
+    trackLayerPropertyChange('shadow');
   };
 
   const handleInnerShadowChange = (updates: Partial<InnerShadow>) => {
     updateLayer(layer.id, {
       innerShadow: { ...(layer.innerShadow ?? { enabled: false, color: 'rgba(0, 0, 0, 0.5)', blur: 10, offsetX: 2, offsetY: 2 }), ...updates },
     });
+    recordPropertyEdit('innerShadow');
+    trackLayerPropertyChange('innerShadow');
   };
 
   const handleStrokeChange = (updates: Partial<Stroke>) => {
     updateLayer(layer.id, {
       stroke: { ...layer.stroke, ...updates },
     });
+    recordPropertyEdit('stroke');
+    trackLayerPropertyChange('stroke');
   };
 
   const handleGlowChange = (updates: Partial<Glow>) => {
     updateLayer(layer.id, {
       glow: { ...layer.glow, ...updates },
     });
+    recordPropertyEdit('glow');
+    trackLayerPropertyChange('glow');
   };
 
   const toggleSection = (section: EffectSection) => {
